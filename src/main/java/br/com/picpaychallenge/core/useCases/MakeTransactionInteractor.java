@@ -32,7 +32,6 @@ public class MakeTransactionInteractor {
         receiver.setBalance(receiver.getBalance() + amount);
 
         Transaction transaction = new Transaction(sender, receiver, amount);
-        transactionGateway.createTransaction(transaction);
-        return transaction;
+        return transactionGateway.createTransaction(transaction);
     }
 }
