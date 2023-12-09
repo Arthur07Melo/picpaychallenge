@@ -6,6 +6,7 @@ import br.com.picpaychallenge.core.exceptions.NotSuficientBalanceException;
 import br.com.picpaychallenge.core.exceptions.TransactionNotAuthorized;
 import br.com.picpaychallenge.core.external.ValidateTransaction;
 import br.com.picpaychallenge.core.gateways.TransactionGateway;
+import br.com.picpaychallenge.core.port.IdGenerator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -26,6 +27,9 @@ class MakeTransactionInteractorTest {
     @Mock
     private TransactionGateway transactionGateway;
 
+    @Mock
+    private IdGenerator idGenerator;
+
     @BeforeEach
     public void init(){
         MockitoAnnotations.openMocks(this);
@@ -33,10 +37,12 @@ class MakeTransactionInteractorTest {
 
     @Test
     void executeSuccess() throws Exception {
-        User sender = new User("Arthur", "999.999.999-99", "aarthur00ian@gmail.com", "admin", 32D, false);
-        User receiver = new User("Samuka", "999.999.999-99", "samuka00@gmail.com", "admin", 100D, false);
+        User sender = new User("77e705f3-0809-40f6-85f7-0f208ea8b813", "Arthur", "999.999.999-99", "aarthur00ian@gmail.com", "admin", 32D, false);
+        User receiver = new User("7568ec7c-2f64-4fad-8767-b56dc7b83ff8", "Samuka", "999.999.999-99", "samuka00@gmail.com", "admin", 100D, false);
 
-        Transaction transaction = new Transaction(sender, receiver, 20D);
+        when(idGenerator.generate()).thenReturn("9d553c6f-e93f-4723-96b2-dd07a5266e75");
+
+        Transaction transaction = new Transaction(idGenerator.generate(), sender, receiver, 20D);
 
         when(validateTransaction.execute()).thenReturn(true);
         when(transactionGateway.createTransaction(any(Transaction.class))).thenReturn(transaction);
@@ -48,10 +54,12 @@ class MakeTransactionInteractorTest {
 
     @Test
     void executeNotSuficientBalance() throws Exception{
-        User sender = new User("Arthur", "999.999.999-99", "aarthur00ian@gmail.com", "admin", 32D, false);
-        User receiver = new User("Samuka", "999.999.999-99", "samuka00@gmail.com", "admin", 100D, false);
+        User sender = new User("77e705f3-0809-40f6-85f7-0f208ea8b813", "Arthur", "999.999.999-99", "aarthur00ian@gmail.com", "admin", 32D, false);
+        User receiver = new User("7568ec7c-2f64-4fad-8767-b56dc7b83ff8", "Samuka", "999.999.999-99", "samuka00@gmail.com", "admin", 100D, false);
 
-        Transaction transaction = new Transaction(sender, receiver, 33D);
+        when(idGenerator.generate()).thenReturn("9d553c6f-e93f-4723-96b2-dd07a5266e75");
+
+        Transaction transaction = new Transaction(idGenerator.generate(), sender, receiver, 33D);
 
         when(validateTransaction.execute()).thenReturn(true);
         when(transactionGateway.createTransaction(any(Transaction.class))).thenReturn(transaction);
@@ -61,10 +69,12 @@ class MakeTransactionInteractorTest {
 
     @Test
     void executeTransactionNotAuthorized() throws Exception{
-        User sender = new User("Arthur", "999.999.999-99", "aarthur00ian@gmail.com", "admin", 32D, false);
-        User receiver = new User("Samuka", "999.999.999-99", "samuka00@gmail.com", "admin", 100D, false);
+        User sender = new User("77e705f3-0809-40f6-85f7-0f208ea8b813", "Arthur", "999.999.999-99", "aarthur00ian@gmail.com", "admin", 32D, false);
+        User receiver = new User("7568ec7c-2f64-4fad-8767-b56dc7b83ff8", "Samuka", "999.999.999-99", "samuka00@gmail.com", "admin", 100D, false);
 
-        Transaction transaction = new Transaction(sender, receiver, 20D);
+        when(idGenerator.generate()).thenReturn("9d553c6f-e93f-4723-96b2-dd07a5266e75");
+
+        Transaction transaction = new Transaction(idGenerator.generate(), sender, receiver, 20D);
 
         when(validateTransaction.execute()).thenReturn(false);
         when(transactionGateway.createTransaction(any(Transaction.class))).thenReturn(transaction);

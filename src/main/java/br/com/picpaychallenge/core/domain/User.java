@@ -7,6 +7,9 @@ import lombok.Setter;
 @Getter
 @AllArgsConstructor
 public class User {
+    //Must be unique
+    private String id;
+
     private String fullName;
 
     //Must be unique

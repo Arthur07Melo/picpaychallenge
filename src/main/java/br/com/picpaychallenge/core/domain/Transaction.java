@@ -6,6 +6,9 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class Transaction {
+    //must be unique
+    private String id;
+
     private User sender;
 
     private User receiver;
