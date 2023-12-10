@@ -3,6 +3,7 @@ package br.com.picpaychallenge.core.useCases;
 import br.com.picpaychallenge.core.domain.Transaction;
 import br.com.picpaychallenge.core.domain.User;
 import br.com.picpaychallenge.core.exceptions.NotSuficientBalanceException;
+import br.com.picpaychallenge.core.exceptions.ShopKeeperCantMakeTransaction;
 import br.com.picpaychallenge.core.exceptions.TransactionNotAuthorized;
 import br.com.picpaychallenge.core.external.ValidateTransaction;
 import br.com.picpaychallenge.core.gateways.TransactionGateway;
@@ -29,6 +30,10 @@ public class MakeTransactionInteractor {
 
         if(!validateTransaction.execute()) {
             throw new TransactionNotAuthorized();
+        }
+
+        if(sender.getIsShopKeeper()){
+            throw new ShopKeeperCantMakeTransaction();
         }
 
         sender.setBalance(senderBalance - amount);

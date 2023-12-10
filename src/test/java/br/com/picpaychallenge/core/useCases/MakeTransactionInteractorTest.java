@@ -3,6 +3,7 @@ package br.com.picpaychallenge.core.useCases;
 import br.com.picpaychallenge.core.domain.Transaction;
 import br.com.picpaychallenge.core.domain.User;
 import br.com.picpaychallenge.core.exceptions.NotSuficientBalanceException;
+import br.com.picpaychallenge.core.exceptions.ShopKeeperCantMakeTransaction;
 import br.com.picpaychallenge.core.exceptions.TransactionNotAuthorized;
 import br.com.picpaychallenge.core.external.ValidateTransaction;
 import br.com.picpaychallenge.core.gateways.TransactionGateway;
@@ -36,9 +37,32 @@ class MakeTransactionInteractorTest {
     }
 
     @Test
-    void executeSuccess() throws Exception {
-        User sender = new User("77e705f3-0809-40f6-85f7-0f208ea8b813", "Arthur", "999.999.999-99", "aarthur00ian@gmail.com", "admin", 32D, false);
-        User receiver = new User("7568ec7c-2f64-4fad-8767-b56dc7b83ff8", "Samuka", "999.999.999-99", "samuka00@gmail.com", "admin", 100D, false);
+    void executeSuccessToUser() throws Exception {
+        User sender = new User("77e705f3-0809-40f6-85f7-0f208ea8b813", "Arthur", "999.999.999-99",
+                "aarthur00ian@gmail.com", "admin", 32D, false);
+
+        User receiver = new User("7568ec7c-2f64-4fad-8767-b56dc7b83ff8", "Samuka", "999.999.999-99",
+                "samuka00@gmail.com", "admin", 100D, false);
+
+        when(idGenerator.generate()).thenReturn("9d553c6f-e93f-4723-96b2-dd07a5266e75");
+
+        Transaction transaction = new Transaction(idGenerator.generate(), sender, receiver, 20D);
+
+        when(validateTransaction.execute()).thenReturn(true);
+        when(transactionGateway.createTransaction(any(Transaction.class))).thenReturn(transaction);
+
+        assertEquals(transaction, makeTransaction.execute(sender, receiver, 20D));
+        assertEquals(12D, sender.getBalance());
+        assertEquals(120D, receiver.getBalance());
+    }
+
+    @Test
+    void executeSuccessToShopKeeper() throws Exception {
+        User sender = new User("77e705f3-0809-40f6-85f7-0f208ea8b813", "Arthur", "999.999.999-99",
+                "aarthur00ian@gmail.com", "admin", 32D, false);
+
+        User receiver = new User("7568ec7c-2f64-4fad-8767-b56dc7b83ff8", "Samuka", "999.999.999-99",
+                "samuka00@gmail.com", "admin", 100D, true);
 
         when(idGenerator.generate()).thenReturn("9d553c6f-e93f-4723-96b2-dd07a5266e75");
 
@@ -54,8 +78,11 @@ class MakeTransactionInteractorTest {
 
     @Test
     void executeNotSuficientBalance() throws Exception{
-        User sender = new User("77e705f3-0809-40f6-85f7-0f208ea8b813", "Arthur", "999.999.999-99", "aarthur00ian@gmail.com", "admin", 32D, false);
-        User receiver = new User("7568ec7c-2f64-4fad-8767-b56dc7b83ff8", "Samuka", "999.999.999-99", "samuka00@gmail.com", "admin", 100D, false);
+        User sender = new User("77e705f3-0809-40f6-85f7-0f208ea8b813", "Arthur", "999.999.999-99",
+                "aarthur00ian@gmail.com", "admin", 32D, false);
+
+        User receiver = new User("7568ec7c-2f64-4fad-8767-b56dc7b83ff8", "Samuka", "999.999.999-99",
+                "samuka00@gmail.com", "admin", 100D, false);
 
         when(idGenerator.generate()).thenReturn("9d553c6f-e93f-4723-96b2-dd07a5266e75");
 
@@ -69,8 +96,11 @@ class MakeTransactionInteractorTest {
 
     @Test
     void executeTransactionNotAuthorized() throws Exception{
-        User sender = new User("77e705f3-0809-40f6-85f7-0f208ea8b813", "Arthur", "999.999.999-99", "aarthur00ian@gmail.com", "admin", 32D, false);
-        User receiver = new User("7568ec7c-2f64-4fad-8767-b56dc7b83ff8", "Samuka", "999.999.999-99", "samuka00@gmail.com", "admin", 100D, false);
+        User sender = new User("77e705f3-0809-40f6-85f7-0f208ea8b813", "Arthur", "999.999.999-99",
+                "aarthur00ian@gmail.com", "admin", 32D, false);
+
+        User receiver = new User("7568ec7c-2f64-4fad-8767-b56dc7b83ff8", "Samuka", "999.999.999-99",
+                "samuka00@gmail.com", "admin", 100D, false);
 
         when(idGenerator.generate()).thenReturn("9d553c6f-e93f-4723-96b2-dd07a5266e75");
 
@@ -80,5 +110,23 @@ class MakeTransactionInteractorTest {
         when(transactionGateway.createTransaction(any(Transaction.class))).thenReturn(transaction);
 
         assertThrows(TransactionNotAuthorized.class, () -> makeTransaction.execute(sender, receiver, 20D));
+    }
+
+    @Test
+    void executeShopKeeperCantMakeTransaction() throws Exception{
+        User sender = new User("77e705f3-0809-40f6-85f7-0f208ea8b813", "Arthur", "999.999.999-99",
+                "aarthur00ian@gmail.com", "admin", 32D, true);
+
+        User receiver = new User("7568ec7c-2f64-4fad-8767-b56dc7b83ff8", "Samuka", "999.999.999-99",
+                "samuka00@gmail.com", "admin", 100D, false);
+
+        when(idGenerator.generate()).thenReturn("9d553c6f-e93f-4723-96b2-dd07a5266e75");
+
+        Transaction transaction = new Transaction(idGenerator.generate(), sender, receiver, 20D);
+
+        when(validateTransaction.execute()).thenReturn(true);
+        when(transactionGateway.createTransaction(any(Transaction.class))).thenReturn(transaction);
+
+        assertThrows(ShopKeeperCantMakeTransaction.class, () -> makeTransaction.execute(sender, receiver, 20D));
     }
 }
